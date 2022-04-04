@@ -1,0 +1,41 @@
+# os
+.DS_Store
+
+# editor
+.idea/
+.vscode/
+.nova/
+
+# node
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# env
+.env.test
+.env*.local
+
+# build
+dist
+lib/
+cjs/
+esm/
+docs/.docgen/
+
+# typescript
+*.tsbuildinfo
+
+# project
+docs/.cache
+docs/public
+storybook-static
+.next
+docs/src/components/Test.tsx
+____*.internal.ts
+____*.internal.tsx
