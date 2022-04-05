@@ -24,7 +24,7 @@ interface IUpdateData {
 
 interface IUseUpdate {
     (baseURL: string, auth: boolean): [
-        StatusComponent: IStatusComp,
+        StatusComponent: React.FC,
         updateData: IUpdateData,
         abortCont: AbortController,
         status: {
@@ -33,15 +33,6 @@ interface IUseUpdate {
             isPending: boolean;
         }
     ];
-}
-interface IStatusComp {
-    (): JSX.Element;
-    Button: React.FunctionComponent<
-        React.DetailedHTMLProps<
-            React.ButtonHTMLAttributes<HTMLButtonElement>,
-            HTMLButtonElement
-        >
-    >;
 }
 
 const useStyle = createUseStyles({
@@ -129,7 +120,7 @@ const useStyle = createUseStyles({
 const useUpdate: IUseUpdate = (baseURL, auth) => {
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isPending, setIsPending] = useState(true);
+    const [isPending, setIsPending] = useState(false);
     const abortCont = new AbortController();
     const classes = useStyle();
     const updateData: IUpdateData = (
@@ -158,7 +149,6 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
 
         fetch(baseURL + locator, options)
             .then((res) => {
-                console.log(res);
                 setIsPending(false);
                 if (debug)
                     return res.text().then((data) => {
@@ -193,7 +183,7 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
     };
 
     // main status components that help to display status of our request
-    const StatusComp: IStatusComp = () => {
+    const StatusComp: React.FC = () => {
         return (
             <>
                 {isPending && (
@@ -278,25 +268,6 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
                     </div>
                 )}
             </>
-        );
-    };
-
-    // this is only for loading button or disable button
-    StatusComp.Button = ({ children, ...rest }) => {
-        return (
-            <button disabled={isPending} {...rest}>
-                {isPending && (
-                    <>
-                        <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                            aria-hidden="true"
-                        ></span>
-                        Loading...
-                    </>
-                )}
-                {!isPending && children}
-            </button>
         );
     };
     return [StatusComp, updateData, abortCont, { success, error, isPending }];

@@ -3,16 +3,19 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import useUpdate from "./useUpdate";
 
 const Form = () => {
-    const [StatusComp, updateData] = useUpdate("https://reqres.in/api", false);
+    const [StatusComp, updateData, abortCont, { isPending }] = useUpdate(
+        "https://reqres.in/api",
+        false
+    );
     const handleClick = () => {
         updateData("/users/2", { method: "DELETE" });
     };
     return (
         <>
             <StatusComp />
-            <StatusComp.Button onClick={handleClick}>
+            <button disabled={isPending} onClick={handleClick}>
                 Click Me
-            </StatusComp.Button>
+            </button>
         </>
     );
 };
