@@ -21,7 +21,7 @@ const Form = () => {
 };
 
 export default {
-    title: "ReactComponentLibrary/useUpdate",
+    title: "ReactHookLibrary/useUpdate",
     component: Form,
 } as ComponentMeta<typeof Form>;
 
