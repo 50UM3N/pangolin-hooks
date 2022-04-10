@@ -165,11 +165,12 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
                 try {
                     let parseData = JSON.parse(data);
                     setSuccess(parseData.message);
+                    onSuccess(parseData);
                 } catch (error) {
                     if (!data) data = "Operation successful";
                     setSuccess(data);
+                    onSuccess(data);
                 }
-                onSuccess(data);
             })
             .catch((err) => {
                 setIsPending(false);
