@@ -2,13 +2,13 @@ import React, { useState } from "react";
 // required|number|string|email|confirm_password
 
 const prevStateConverter = (data: ValidatorState, old: object | null | any) => {
-    for (let [key] of Object.entries(data)) {
+    for (const [key] of Object.entries(data)) {
         if (data[key].validate.includes("required")) data[key].required = true;
         else data[key].required = false;
     }
 
     if (old !== null) {
-        for (let [key] of Object.entries(data)) {
+        for (const [key] of Object.entries(data)) {
             if (old[key] !== undefined && old[key] !== null)
                 data[key].value = old[key];
         }
@@ -49,7 +49,7 @@ type TValidationTypes =
 type ValidatorState = {
     [key: string]: {
         value: any;
-        validate: TValidationTypes;
+        validate: string;
         error: null | string;
         required?: boolean;
     };
@@ -96,12 +96,12 @@ const useValidate: IUseValidate = (value, old = null) => {
 
     const validOnChange: TValidOnChange = (
         { value, name },
-        callback = () => {}
+        callback = () => void 0
     ) => {
-        let oldState: any = { value: value };
-        let validation = state[name].validate;
+        const oldState: any = { value: value };
+        const validation = state[name].validate;
         if (validation) {
-            let validate = validateField(validation.split("|"), value);
+            const validate = validateField(validation.split("|"), value);
             oldState.error = validate.message;
         }
         // change state accordingly
@@ -122,7 +122,7 @@ const useValidate: IUseValidate = (value, old = null) => {
             message: null,
         };
         for (let i = 0; i < validation.length; i++) {
-            let type = validation[i];
+            const type = validation[i];
             switch (type) {
                 case "required":
                     validMsg = checkRequired(value);
@@ -151,10 +151,13 @@ const useValidate: IUseValidate = (value, old = null) => {
     };
     const validate = () => {
         let flag = true;
-        let oldState = { ...state };
-        for (let [key] of Object.entries(oldState)) {
-            let data = oldState[key];
-            let validate = validateField(data.validate.split("|"), data.value);
+        const oldState = { ...state };
+        for (const [key] of Object.entries(oldState)) {
+            const data = oldState[key];
+            const validate = validateField(
+                data.validate.split("|"),
+                data.value
+            );
             if (!validate.valid) flag = false;
             data.error = validate.message;
         }
@@ -163,8 +166,8 @@ const useValidate: IUseValidate = (value, old = null) => {
     };
 
     const generalize = (newState?: object): object => {
-        let response: any = {};
-        for (let [key, data] of Object.entries(
+        const response: any = {};
+        for (const [key, data] of Object.entries(
             newState ? { ...newState } : { ...state }
         )) {
             response[key] = data.value;

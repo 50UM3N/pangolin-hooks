@@ -11,11 +11,11 @@ const Example = () => {
         return () => {
             pf.abortCont.abort();
         };
-    }, []);
+    }, [fetchData, pf.abortCont]);
 
     return (
         <>
-            {pf.isPending && <p>pending...</p>}
+            {pf.pending && <p>pending...</p>}
             {pf.error && <p>{pf.error}</p>}
             {data && <p>d{console.log(data)}</p>}
         </>

@@ -1,19 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import useUpdate from "./useUpdate";
 
 const Form = () => {
-    const [StatusComp, updateData, abortCont, { isPending }] = useUpdate(
+    const [updateData, { pending, abortCont, StatusComp }] = useUpdate(
         "https://reqres.in/api",
         false
     );
+
+    useEffect(() => {
+        return () => {
+            abortCont.abort();
+        };
+    }, [abortCont]);
+
     const handleClick = () => {
         updateData("/users/2", { method: "DELETE" });
     };
     return (
         <>
             <StatusComp />
-            <button disabled={isPending} onClick={handleClick}>
+            <button disabled={pending} onClick={handleClick}>
                 Click Me
             </button>
         </>

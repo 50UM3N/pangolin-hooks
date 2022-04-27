@@ -4,38 +4,54 @@ type TUseFetch = (auth?: boolean) => [
     data: null | object,
     fetchData: TFetchData,
     functions: {
-        isPending: boolean;
+        pending: boolean;
         error: string | null;
-        setIsPending: React.Dispatch<React.SetStateAction<boolean>>;
+        setPending: React.Dispatch<React.SetStateAction<boolean>>;
         setError: React.Dispatch<React.SetStateAction<string | null>>;
         abortCont: AbortController;
         setData: React.Dispatch<React.SetStateAction<null | object>>;
     }
 ];
 
-type TFetchData = (locator: string) => void;
+type TFetchData = (
+    locator: string,
+    options?: {
+        method?:
+            | "GET"
+            | "PUT"
+            | "CONNECT"
+            | "DELETE"
+            | "POST"
+            | "OPTIONS"
+            | "TRACE"
+            | "PATCH"
+            | "HEAD";
+
+        debug?: boolean;
+    }
+) => void;
 
 const useFetch: TUseFetch = (auth = true) => {
     const [data, setData] = useState<null | object>(null);
     const [error, setError] = useState<null | string>(null);
-    const [isPending, setIsPending] = useState(true);
+    const [pending, setPending] = useState(true);
 
     const abortCont = useMemo(() => new AbortController(), []);
 
     const fetchData: TFetchData = useCallback(
-        (locator) => {
-            setIsPending(true);
+        (locator, options = { method: "GET", debug: false }) => {
+            setPending(true);
             setData(null);
             setError(null);
             const token = window.localStorage.getItem("token");
             if (!token && auth) {
-                setIsPending(false);
+                setPending(false);
                 setError("You are not authorize login again tok continue");
                 return;
             }
             fetch(locator, {
                 signal: abortCont.signal,
-                method: "GET",
+                method: options.method,
                 headers: {
                     Accept: "application/json",
                     Authorization: "Bearer " + token,
@@ -43,7 +59,11 @@ const useFetch: TUseFetch = (auth = true) => {
                 },
             })
                 .then((res) => {
-                    setIsPending(false);
+                    setPending(false);
+                    if (options.debug)
+                        return res.text().then((data) => {
+                            throw Error(data);
+                        });
                     if (!res.ok)
                         return res.json().then((error) => {
                             throw Error(error.message);
@@ -51,9 +71,15 @@ const useFetch: TUseFetch = (auth = true) => {
                     return res.json();
                 })
                 .then((data) => {
+                    setPending(false);
                     setData(data);
                 })
                 .catch((err) => {
+                    setPending(false);
+                    if (options.debug) {
+                        console.log(err);
+                        return;
+                    }
                     if (err.name === "AbortError") return;
                     setError(err.message);
                 });
@@ -63,7 +89,7 @@ const useFetch: TUseFetch = (auth = true) => {
     return [
         data,
         fetchData,
-        { isPending, error, setIsPending, setError, abortCont, setData },
+        { pending, error, setPending, setError, abortCont, setData },
     ];
 };
 

@@ -9,7 +9,7 @@
     ],
     "types": "dist/index.d.ts",
     "scripts": {
-        "rollup": "rollup -c",
+        "build": "rollup -c",
         "test": "jest",
         "storybook": "start-storybook -p 6006",
         "build-storybook": "build-storybook"
@@ -50,9 +50,14 @@
         "@testing-library/react": "^13.0.0",
         "@types/jest": "^27.4.1",
         "@types/react": "^17.0.43",
+        "@typescript-eslint/eslint-plugin": "^5.21.0",
+        "@typescript-eslint/parser": "^5.21.0",
         "babel-jest": "^27.5.1",
         "babel-loader": "^8.2.4",
         "dayjs": "^1.11.0",
+        "eslint": "^8.14.0",
+        "eslint-config-react-app": "^7.0.1",
+        "eslint-plugin-react": "^7.29.4",
         "jest": "^27.5.1",
         "react-jss": "^10.9.0",
         "rollup": "^2.70.1",

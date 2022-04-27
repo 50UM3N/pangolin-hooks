@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { useState } from "react";
 import { createUseStyles } from "react-jss";
 interface IUpdateData {
@@ -24,13 +24,13 @@ interface IUpdateData {
 
 interface IUseUpdate {
     (baseURL: string, auth: boolean): [
-        StatusComponent: React.FC,
         updateData: IUpdateData,
-        abortCont: AbortController,
         status: {
             success: string | null;
             error: string | null;
-            isPending: boolean;
+            pending: boolean;
+            abortCont: AbortController;
+            StatusComp: React.FC;
         }
     ];
 }
@@ -120,74 +120,78 @@ const useStyle = createUseStyles({
 const useUpdate: IUseUpdate = (baseURL, auth) => {
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [isPending, setIsPending] = useState(false);
-    const abortCont = new AbortController();
+    const [pending, setIsPending] = useState(false);
+    const abortCont = useMemo(() => new AbortController(), []);
     const classes = useStyle();
-    const updateData: IUpdateData = (
-        locator,
-        { method = "GET", body, onSuccess = () => {}, debug }
-    ) => {
-        setError(null);
-        setIsPending(true);
-        setSuccess(null);
-        const token = window.localStorage.getItem("token");
-        if (!token && auth) {
-            setError("Unauthenticated.");
-            setIsPending(false);
-            return;
-        }
-        let options: any = {
-            signal: abortCont.signal,
-            method: method,
-            headers: {
-                Accept: "application/json",
-                Authorization: "Bearer " + token,
-                "Content-type": "application/json",
-            },
-        };
-        if (method !== "GET" && method !== "HEAD") options.body = body;
 
-        fetch(baseURL + locator, options)
-            .then((res) => {
+    const updateData: IUpdateData = useCallback(
+        (
+            locator,
+            { method = "GET", body, onSuccess = () => void 0, debug = false }
+        ) => {
+            setError(null);
+            setIsPending(true);
+            setSuccess(null);
+            const token = window.localStorage.getItem("token");
+            if (!token && auth) {
+                setError("Unauthenticated.");
                 setIsPending(false);
-                if (debug)
-                    return res.text().then((data) => {
-                        throw Error(data);
-                    });
-                if (!res.ok)
-                    return res.json().then((error) => {
-                        throw Error(error.message);
-                    });
+                return;
+            }
+            const options: any = {
+                signal: abortCont.signal,
+                method: method,
+                headers: {
+                    Accept: "application/json",
+                    Authorization: "Bearer " + token,
+                    "Content-type": "application/json",
+                },
+            };
+            if (method !== "GET" && method !== "HEAD") options.body = body;
 
-                return res.text();
-            })
-            .then((data) => {
-                try {
-                    let parseData = JSON.parse(data);
-                    setSuccess(parseData.message);
-                    onSuccess(parseData);
-                } catch (error) {
-                    if (!data) data = "Operation successful";
-                    setSuccess(data);
-                    onSuccess(data);
-                }
-            })
-            .catch((err) => {
-                setIsPending(false);
-                if (debug) {
-                    console.log(err);
-                    return;
-                }
-                if (err.name === "AbortError") return;
-                setError(err.message);
-            });
-    };
+            fetch(baseURL + locator, options)
+                .then((res) => {
+                    setIsPending(false);
+                    if (debug)
+                        return res.text().then((data) => {
+                            throw Error(data);
+                        });
+                    if (!res.ok)
+                        return res.json().then((error) => {
+                            throw Error(error.message);
+                        });
+
+                    return res.text();
+                })
+                .then((data) => {
+                    try {
+                        const parseData = JSON.parse(data);
+                        setSuccess(parseData.message);
+                        onSuccess(parseData);
+                    } catch (error) {
+                        if (!data) data = "Operation successful";
+                        setSuccess(data);
+                        onSuccess(data);
+                    }
+                })
+                .catch((err) => {
+                    setIsPending(false);
+                    if (debug) {
+                        console.log(err);
+                        return;
+                    }
+                    if (err.name === "AbortError") return;
+                    setError(err.message);
+                });
+        },
+        [abortCont, auth, baseURL]
+    );
 
     // main status components that help to display status of our request
     const StatusComp: React.FC = () => {
         return (
             <>
-                {isPending && (
+                {pending && (
                     <div className={classes.toastWrapper}>
                         <div
                             className={classes.toast}
@@ -271,7 +275,7 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
             </>
         );
     };
-    return [StatusComp, updateData, abortCont, { success, error, isPending }];
+    return [updateData, { success, error, pending, abortCont, StatusComp }];
 };
 export default useUpdate;
 

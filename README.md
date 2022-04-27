@@ -2,9 +2,10 @@
 
 Pangolin Hooks a react Hook library containing multiple hook to handle certain type of task.
 
-Currently there are two hooks.
-
 -   useValidate
+-   useUpdate
+-   useFetch
+-   useFetchEffect
 -   useUpdate
 
 ## Installation
@@ -155,4 +156,152 @@ function Demo(){
     ...
 }
 
+```
+
+## useFetch
+
+This hook help to fetch data from any api location and gives the parsed json form of data.
+
+`useFetch` hook accepts only one argument `auth:boolean` that helps to do a api authentication. The api authentication works in the header property the authentication set like that `Authorization: "Bearer " + token` the token is get from local storage with the default key name `token`. If the token is not present in the local storage then it will give error as `unauthenticated`.
+
+`useFetch` returns an array of three return value.
+
+-   `data` - The data fetch from the server of any api.
+-   `fetchData` - This is a function help to fetch the data from the server or any location having two arguments `location` and `options`
+
+    -   `locator` - The api location eg - `https://pokeapi.co/api/v2/pokemon/ditto`.
+    -   `options` - This is an object and optional and the default value is `{method: "GET", debug: false}`. If the debug is true it will throw an error in the browser console.
+
+-   `pending` - `boolean` This is an state the represent that the data is fetching like loading
+-   `error` - `boolean|string` This is an state show that there is an error or not.
+-   `setPending` - This will set the state of the pending.
+-   `setError` - This will set the state of the error.
+-   `setData` - This will set the state of the data.
+-   `abortCont` - This will help to abort the ongoing request if the component is unmount. Use this in the cleanup function.
+
+### Usage
+
+This is an simple example with cleanup function
+
+```tsx
+import React, { useEffect } from "react";
+import { useFetch } from "pangolin-hooke";
+const Example = () => {
+    const [data, fetchData, pf] = useFetch(false);
+    useEffect(() => {
+        fetchData("https://jsonplaceholder.typicode.com/todos/1");
+        return () => {
+            pf.abortCont.abort();
+        };
+    }, [fetchData, pf.abortCont]);
+
+    return (
+        <>
+            {pf.pending && <p>Pending...</p>}
+            {pf.error && <p>{pf.error}</p>}
+            {data && <p>{JSON.stringify(data)}</p>}
+        </>
+    );
+};
+```
+
+The p tag with data shows `{"userId":1,"id":1,"title":"delectus aut autem","completed":false}` after getting the response.
+
+## useFetchEffect
+
+This similar type of hook like `useFetch` but less options to set and already having the abort controller in useEffect cleanup function.
+
+`useFetchEffect` hook accepts only two arguments `locator` and the `options`.
+
+-   `locator` - The api location eg - `https://pokeapi.co/api/v2/pokemon/ditto`.
+-   `options` - This is an object and optional and the default value is `{auth:true, method: "GET", debug: false}`. If the debug is true it will throw an error in the browser console. The auth options help to authenticate the api like useFetch.
+
+`useFetchEffect` returns an array of three return value.
+
+-   `data` - The data fetch from the server of any api.
+-   `pending` - `boolean` This is an state the represent that the data is fetching like loading
+-   `error` - `boolean|string` This is an state show that there is an error or not.
+
+### Usage
+
+This is an simple example with cleanup function
+
+```tsx
+import React, { useEffect } from "react";
+import { useFetchEffect } from "pangolin-hooke";
+const Example = () => {
+    const [data, pending, error] = useFetchEffect(
+        "https://jsonplaceholder.typicode.com/todos/1",
+        { auth: false }
+    );
+
+    return (
+        <>
+            {pending && <p>pending...</p>}
+            {error && <p>{error}</p>}
+            {data && <p>{JSON.stringify(data)}</p>}
+        </>
+    );
+};
+```
+
+The p tag with data shows `{"userId":1,"id":1,"title":"delectus aut autem","completed":false}` after getting the response.
+
+## useUpdate
+
+This similar type of hook like `useFetch` and `useFetchEffect` but use for only sending data to the server by various http methods. Having all others features like other two hooks.
+
+`useFetchEffect` hook accepts only two arguments `baseURL` and the `auth`.
+
+-   `baseURL` - The api base eg - `https://pokeapi.co/api/v2`.
+-   `auth` - The auth options help to authenticate the api like useFetch.
+
+`useFetchEffect` returns an array of two return value.
+If the server send an json then it must contain a key name `message` where contain the message otherwise the text message shown in the status `success`
+
+-   `updateData` - This function helps to pass send the request to the server. This function takes two arguments `locator` and `options`
+    -   `locator` - The path you want to send request eg - `/some-location`
+    -   `options` - The options is an object with default value `{ method = "GET", body, onSuccess = (data) => void 0, debug = false }`
+        -   `method` - HTTP methods `"GET" | "PUT" | "CONNECT" | "DELETE" | "POST" | "OPTIONS" | "TRACE" | "PATCH" | "HEAD"`
+        -   `body` - This the body of fetch request must be convert into string before sending.
+        -   `onSuccess` - this callback function call when the request is successfully and `data` is the return value from the server.
+        -   `debug` - If the debug is true it will throw an error in the browser console.
+-   `status` - This is an object having multiple status and options.
+    -   `success` - Show success message that comes from the server. If the server send status code `ok` then it will display default `Operation successful` message. If the server send an text message the the message is set to the success. If the server send an object then the object must contains an key `message` which one is set to the this.
+    -   `error` - Error message if any case
+    -   `pending` - `boolean` This is an state the represent that the data is fetching like loading. You can use this in the combination of button disabled property.
+    -   `abortCont` - This will help to abort the ongoing request if the component is unmount. Use this in the cleanup function.
+    -   `StatusComp` - This is an jsx Element that show a toast message according to `success , error, pending` status.
+
+### Usage
+
+This is an simple example with cleanup function
+
+```tsx
+import React, { useUpdate } from "react";
+import { useFetchEffect } from "pangolin-hooke";
+const Example = () => {
+    const [updateData, { pending, abortCont, StatusComp }] = useUpdate(
+        "https://reqres.in/api",
+        false
+    );
+
+    useEffect(() => {
+        return () => {
+            abortCont.abort();
+        };
+    }, [abortCont]);
+
+    const handleClick = () => {
+        updateData("/users/2", { method: "DELETE" });
+    };
+    return (
+        <>
+            <StatusComp />
+            <button disabled={pending} onClick={handleClick}>
+                Click Me
+            </button>
+        </>
+    );
+};
 ```
