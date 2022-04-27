@@ -1,4 +1,10 @@
-# Pangolin Hooks
+<p align="center">
+        <img src="md-assets/pangolin.png" width="512"  alt="Preview" />
+</p>
+
+<p align="center">
+    <h1 align="center">Pangolin Hooks</h1>
+</p>
 
 Pangolin Hooks a react Hook library containing multiple hook to handle certain type of task.
 
