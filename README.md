@@ -45,7 +45,7 @@ Hook returns an array of form schema and the functions object:
 This is the simple form with submit and on change event
 
 ```tsx
-import {useValidate} from "pangolin-hook";
+import {useValidate} from "pangolin-hooks";
 
 function Demo(){
     const [form, validator] = useValidate({
@@ -123,7 +123,7 @@ return (
 Set the previous data i.e the data that get from server
 
 ```tsx
-import {useValidate} from "pangolin-hook";
+import {useValidate} from "pangolin-hooks";
 
 function Demo(){
     const [form, validator] = useValidate(
@@ -185,7 +185,7 @@ This is an simple example with cleanup function
 
 ```tsx
 import React, { useEffect } from "react";
-import { useFetch } from "pangolin-hook";
+import { useFetch } from "pangolin-hooks";
 const Example = () => {
     const [data, fetchData, pf] = useFetch(false);
     useEffect(() => {
@@ -228,7 +228,7 @@ This is an simple example with cleanup function
 
 ```tsx
 import React, { useEffect } from "react";
-import { useFetchEffect } from "pangolin-hook";
+import { useFetchEffect } from "pangolin-hooks";
 const Example = () => {
     const [data, pending, error] = useFetchEffect(
         "https://jsonplaceholder.typicode.com/todos/1",
@@ -279,7 +279,7 @@ This is an simple example with cleanup function
 
 ```tsx
 import React, { useUpdate } from "react";
-import { useFetchEffect } from "pangolin-hook";
+import { useFetchEffect } from "pangolin-hooks";
 const Example = () => {
     const [updateData, { pending, abortCont, StatusComp }] = useUpdate(
         "https://reqres.in/api",
