@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 export interface IUseFetchEffect {
     (
         locator: string,
-        options: {
+        options?: {
             auth?: boolean;
             method?:
                 | "GET"
@@ -23,7 +23,7 @@ export interface IUseFetchEffect {
 
 const useFetchEffect: IUseFetchEffect = (
     locator,
-    { auth = true, method = "GET", debug = false }
+    { auth = true, method = "GET", debug = false } = {}
 ) => {
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState<null | string>(null);

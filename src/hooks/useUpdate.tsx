@@ -4,7 +4,7 @@ import { createUseStyles } from "react-jss";
 interface IUpdateData {
     (
         locator: string,
-        options: {
+        options?: {
             method?:
                 | "GET"
                 | "PUT"
@@ -23,7 +23,7 @@ interface IUpdateData {
 }
 
 interface IUseUpdate {
-    (baseURL: string, auth: boolean): [
+    (baseURL: string, auth?: boolean): [
         updateData: IUpdateData,
         status: {
             success: string | null;
@@ -117,7 +117,7 @@ const useStyle = createUseStyles({
     },
 });
 
-const useUpdate: IUseUpdate = (baseURL, auth) => {
+const useUpdate: IUseUpdate = (baseURL, auth = true) => {
     const [success, setSuccess] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [pending, setIsPending] = useState(false);
@@ -127,7 +127,12 @@ const useUpdate: IUseUpdate = (baseURL, auth) => {
     const updateData: IUpdateData = useCallback(
         (
             locator,
-            { method = "GET", body, onSuccess = () => void 0, debug = false }
+            {
+                method = "GET",
+                body,
+                onSuccess = () => void 0,
+                debug = false,
+            } = {}
         ) => {
             setError(null);
             setIsPending(true);

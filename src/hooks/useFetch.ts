@@ -39,7 +39,7 @@ const useFetch: TUseFetch = (auth = true) => {
     const abortCont = useMemo(() => new AbortController(), []);
 
     const fetchData: TFetchData = useCallback(
-        (locator, options = { method: "GET", debug: false }) => {
+        (locator, { method= "GET", debug= false }={}) => {
             setPending(true);
             setData(null);
             setError(null);
@@ -51,7 +51,7 @@ const useFetch: TUseFetch = (auth = true) => {
             }
             fetch(locator, {
                 signal: abortCont.signal,
-                method: options.method,
+                method: method,
                 headers: {
                     Accept: "application/json",
                     Authorization: "Bearer " + token,
@@ -60,7 +60,7 @@ const useFetch: TUseFetch = (auth = true) => {
             })
                 .then((res) => {
                     setPending(false);
-                    if (options.debug)
+                    if (debug)
                         return res.text().then((data) => {
                             throw Error(data);
                         });
@@ -76,7 +76,7 @@ const useFetch: TUseFetch = (auth = true) => {
                 })
                 .catch((err) => {
                     setPending(false);
-                    if (options.debug) {
+                    if (debug) {
                         console.log(err);
                         return;
                     }

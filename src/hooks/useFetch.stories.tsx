@@ -17,7 +17,7 @@ const Example = () => {
         <>
             {pf.pending && <p>pending...</p>}
             {pf.error && <p>{pf.error}</p>}
-            {data && <p>d{console.log(data)}</p>}
+            {data && <p>d{JSON.stringify(data)}</p>}
         </>
     );
 };
